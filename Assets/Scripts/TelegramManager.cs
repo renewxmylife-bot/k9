@@ -8,7 +8,7 @@ public class TelegramManager : MonoBehaviour {
     public static TelegramManager Instance { get; private set; }
 
     [Header("Backend Configuration")]
-    [SerializeField] private string backendUrl = "http://localhost:3000"; // Can be edited in inspector or runtime
+    [SerializeField] private string backendUrl = "https://rknight.hoangsabelongtovn.site"; // Can be edited in inspector or runtime
 
     [Header("Player State Sync")]
     public long telegramId = 0;
