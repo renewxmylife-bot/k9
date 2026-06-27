@@ -149,6 +149,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenuManager
   playButton: {fileID: 0}
+  buyLivesButton: {fileID: 1123932748}
+  buySkinsButton: {fileID: 855639082}
+  premiumButton: {fileID: 2029669345}
 --- !u!4 &284588306
 Transform:
   m_ObjectHideFlags: 0

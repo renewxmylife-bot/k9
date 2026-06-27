@@ -81,7 +81,7 @@ mergeInto(LibraryManager.library, {
                     display: flex;
                     flex-direction: column;
                     gap: 12px;
-                    max-height: 320px;
+                    max-height: 65vh;
                     overflow-y: auto;
                     padding-right: 5px;
                 }
