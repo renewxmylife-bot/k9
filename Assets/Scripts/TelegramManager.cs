@@ -124,6 +124,32 @@ public class TelegramManager : MonoBehaviour {
         }
     }
 
+    public void SubtractLifeInBackend(int amount) {
+        StartCoroutine(SubtractLifeCoroutine(amount));
+    }
+
+    private IEnumerator SubtractLifeCoroutine(int amount) {
+        string url = $"{backendUrl}/api/user/{telegramId}/subtract-lives";
+        string jsonPayload = $"{{\"amount\":{amount}}}";
+        byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(jsonPayload);
+
+        using (UnityWebRequest webRequest = new UnityWebRequest(url, "POST")) {
+            webRequest.uploadHandler = new UploadHandlerRaw(jsonToSend);
+            webRequest.downloadHandler = new DownloadHandlerBuffer();
+            webRequest.SetRequestHeader("Content-Type", "application/json");
+
+            yield return webRequest.SendWebRequest();
+
+            if (webRequest.result == UnityWebRequest.Result.Success) {
+                string jsonResult = webRequest.downloadHandler.text;
+                Debug.Log("[TELEGRAM] Lives subtracted successfully on backend: " + jsonResult);
+                OnUserSync(jsonResult);
+            } else {
+                Debug.LogError("[TELEGRAM] Failed to subtract life on backend: " + webRequest.error);
+            }
+        }
+    }
+
     [Serializable]
     private class TelegramUser {
         public long id;

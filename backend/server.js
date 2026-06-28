@@ -97,7 +97,7 @@ app.post('/api/create-invoice', async (req, res) => {
         title = `Buy +${count} Lives`;
         description = `Get ${count} additional lives to continue playing and setting new high scores in Flappy Knight!`;
         payload = `lives:${count}`;
-    } else if (item_type === 'skin') {
+    } else if (item_type === 'skin' || item_type === 'skins') {
         const skinName = item_id;
         const validSkins = ['red', 'yellow', 'green', 'blue', 'orange'];
 

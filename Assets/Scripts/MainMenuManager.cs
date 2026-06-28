@@ -7,8 +7,16 @@ public class MainMenuManager : MonoBehaviour {
     [SerializeField] private Button buyLivesButton;
     [SerializeField] private Button buySkinsButton;
     [SerializeField] private Button premiumButton;
+    [SerializeField] private TMPro.TextMeshProUGUI livesText;
 
     private void Awake() {
+        // Auto-detect Lives Text
+        if (livesText == null) {
+            var livesTextObj = GameObject.Find("Canvas/Panel/Lives/Text");
+            if (livesTextObj != null) {
+                livesText = livesTextObj.GetComponent<TMPro.TextMeshProUGUI>();
+            }
+        }
         // Auto-detect and configure Play Button
         if (playButton == null) {
             var playBtnObj = GameObject.Find("Canvas/Panel/Play");
@@ -92,6 +100,12 @@ public class MainMenuManager : MonoBehaviour {
             TelegramManager.Instance.OpenTelegramShop("premium");
         } else {
             UnityEngine.Debug.LogWarning("[MAIN_MENU] TelegramManager Instance not found!");
+        }
+    }
+
+    private void Update() {
+        if (livesText != null && TelegramManager.Instance != null) {
+            livesText.text = TelegramManager.Instance.syncedLives.ToString();
         }
     }
 }

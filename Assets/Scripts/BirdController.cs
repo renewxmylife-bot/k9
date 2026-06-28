@@ -59,7 +59,17 @@ public class BirdController : MonoBehaviour {
         rb.bodyType = RigidbodyType2D.Dynamic;
         rb.linearVelocity = Vector2.zero; // Reset velocity
         isDead = false;
-        currentLives = 5;
+
+        if (TelegramManager.Instance != null) {
+            currentLives = TelegramManager.Instance.syncedLives;
+        } else {
+            currentLives = 5;
+        }
+
+        if (TelegramManager.Instance != null) {
+            UpdateAuraVisual(TelegramManager.Instance.activeSkinName);
+        }
+
         isInvincible = false;
         if (birdCollider != null) {
             birdCollider.isTrigger = false;
@@ -227,6 +237,11 @@ public class BirdController : MonoBehaviour {
         if (currentLives > 0) {
             currentLives--;
             OnLivesChanged?.Invoke(currentLives);
+
+            // Sync subtraction to backend database
+            if (TelegramManager.Instance != null) {
+                TelegramManager.Instance.SubtractLifeInBackend(1);
+            }
 
             if (currentLives > 0) {
                 if (AudioManager.Instance != null) {
