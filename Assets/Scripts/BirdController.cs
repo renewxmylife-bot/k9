@@ -227,9 +227,16 @@ public class BirdController : MonoBehaviour {
         if (isDead) return;
 
         // While invincible/stunned, we might overlap with ground since isTrigger = true.
-        // We still want to handle ground collisions as damage.
         if (other.gameObject.name.Contains("Ground")) {
-            HandleDamage(true);
+            if (isInvincible) {
+                // Teleport to starting position so we don't fall through the ground into the abyss
+                transform.position = startPosition;
+                if (rb != null) {
+                    rb.linearVelocity = Vector2.zero;
+                }
+            } else {
+                HandleDamage(true);
+            }
         }
     }
 
@@ -337,6 +344,7 @@ public class BirdController : MonoBehaviour {
         }
 
         auraSpriteRenderer.gameObject.SetActive(true);
+        auraSpriteRenderer.sortingOrder = 5; // Force rendering in front of backgrounds and pipes!
         Color auraColor = Color.white;
         switch (skinName.ToLower()) {
             case "red":

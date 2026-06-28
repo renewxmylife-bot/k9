@@ -1,17 +1,19 @@
 mergeInto(LibraryManager.library, {
     GetTelegramInitData: function() {
-        if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
+        if (typeof window.Telegram !== 'undefined' && 
+            window.Telegram.WebApp && 
+            window.Telegram.WebApp.initDataUnsafe && 
+            window.Telegram.WebApp.initDataUnsafe.user) {
+            
             var user = window.Telegram.WebApp.initDataUnsafe.user;
-            if (user) {
-                var jsonStr = JSON.stringify({
-                    id: user.id,
-                    username: user.username || user.first_name || "Player"
-                });
-                var bufferSize = lengthBytesUTF8(jsonStr) + 1;
-                var buffer = _malloc(bufferSize);
-                stringToUTF8(jsonStr, buffer, bufferSize);
-                return buffer;
-            }
+            var jsonStr = JSON.stringify({
+                id: user.id,
+                username: user.username || user.first_name || "Player"
+            });
+            var bufferSize = lengthBytesUTF8(jsonStr) + 1;
+            var buffer = _malloc(bufferSize);
+            stringToUTF8(jsonStr, buffer, bufferSize);
+            return buffer;
         }
         return null;
     },

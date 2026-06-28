@@ -95,19 +95,40 @@ public class TelegramManager : MonoBehaviour {
         }
     }
 
+    [Serializable]
+    private class SyncResponse {
+        public bool success;
+        public BackendUser user;
+    }
+
     public void OnUserSync(string jsonPayload) {
         try {
-            BackendUser backendUser = JsonUtility.FromJson<BackendUser>(jsonPayload);
-            syncedLives = backendUser.lives;
-            isPremium = backendUser.is_premium != 0;
-            activeSkinName = backendUser.active_skin;
+            BackendUser backendUser = null;
 
-            Debug.Log($"[TELEGRAM] User state synced. Lives={syncedLives}, Premium={isPremium}, ActiveSkin={activeSkinName}");
+            // Handle wrapped {"success":true,"user":{...}} vs direct user JSON
+            if (jsonPayload.Contains("\"user\":")) {
+                SyncResponse wrapper = JsonUtility.FromJson<SyncResponse>(jsonPayload);
+                if (wrapper != null) {
+                    backendUser = wrapper.user;
+                }
+            } else {
+                backendUser = JsonUtility.FromJson<BackendUser>(jsonPayload);
+            }
 
-            // Update local game managers and controllers
-            if (BirdController.Instance != null) {
-                BirdController.Instance.SetLives(syncedLives);
-                BirdController.Instance.UpdateAuraVisual(activeSkinName);
+            if (backendUser != null) {
+                syncedLives = backendUser.lives;
+                isPremium = backendUser.is_premium;
+                activeSkinName = backendUser.active_skin;
+
+                Debug.Log($"[TELEGRAM] User state synced. Lives={syncedLives}, Premium={isPremium}, ActiveSkin={activeSkinName}");
+
+                // Update local game managers and controllers
+                if (BirdController.Instance != null) {
+                    BirdController.Instance.SetLives(syncedLives);
+                    BirdController.Instance.UpdateAuraVisual(activeSkinName);
+                }
+            } else {
+                Debug.LogError("[TELEGRAM] Failed to parse user state: parsed object is null");
             }
         } catch (Exception ex) {
             Debug.LogError("[TELEGRAM] Failed to sync user state from payload: " + ex.Message);
@@ -162,6 +183,6 @@ public class TelegramManager : MonoBehaviour {
         public string username;
         public int lives;
         public string active_skin;
-        public int is_premium;
+        public bool is_premium;
     }
 }
