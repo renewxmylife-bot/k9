@@ -62,6 +62,7 @@ public class UIManager : MonoBehaviour {
         if (GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.MainMenu) {
             ShowMainMenu();
         }
+        CreateHUDMainMenuButton();
     }
 
     private void OnEnable() {
@@ -168,5 +169,32 @@ public class UIManager : MonoBehaviour {
     private void OnMainMenuPressed() {
         Time.timeScale = 1f;
         UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+    }
+
+    private void CreateHUDMainMenuButton() {
+        if (mainMenuButton != null && hudPanel != null) {
+            // Instantiate a duplicate of the Main Menu button for the gameplay HUD
+            Button hudMenuBtn = Instantiate(mainMenuButton, hudPanel.transform);
+            hudMenuBtn.name = "HUDMainMenuButton";
+
+            // Position it nicely on the right, directly below the Pause button
+            RectTransform rect = hudMenuBtn.GetComponent<RectTransform>();
+            if (rect != null) {
+                rect.anchorMin = new Vector2(0.5f, 0.5f);
+                rect.anchorMax = new Vector2(0.5f, 0.5f);
+                rect.anchoredPosition = new Vector2(350f, 620f); // Directly below the Pause button
+                rect.sizeDelta = new Vector2(250f, 100f); // Match the Pause button size
+            }
+
+            // Adjust text size so it fits inside the smaller button bounds
+            var textComp = hudMenuBtn.GetComponentInChildren<TMP_Text>();
+            if (textComp != null) {
+                textComp.fontSize = 28f;
+            }
+
+            // Set up click action
+            hudMenuBtn.onClick.RemoveAllListeners();
+            hudMenuBtn.onClick.AddListener(OnMainMenuPressed);
+        }
     }
 }
