@@ -149,6 +149,11 @@ public class UIManager : MonoBehaviour {
     }
 
     private void OnRestartPressed() {
+        if (TelegramManager.Instance != null && TelegramManager.Instance.syncedLives <= 0) {
+            UnityEngine.Debug.Log("[UI] Player has 0 lives. Cannot restart. Opening lives shop...");
+            TelegramManager.Instance.OpenTelegramShop("lives");
+            return;
+        }
         if (GameManager.Instance != null) {
             GameManager.Instance.RestartGame();
         }

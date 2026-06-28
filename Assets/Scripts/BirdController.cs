@@ -234,7 +234,9 @@ public class BirdController : MonoBehaviour {
     }
 
     private void HandleDamage(bool isGround) {
-        if (currentLives > 0) {
+        if (isDead || isInvincible) return;
+
+        if (currentLives > 1) {
             currentLives--;
             OnLivesChanged?.Invoke(currentLives);
 
@@ -243,21 +245,27 @@ public class BirdController : MonoBehaviour {
                 TelegramManager.Instance.SubtractLifeInBackend(1);
             }
 
-            if (currentLives > 0) {
-                if (AudioManager.Instance != null) {
-                    AudioManager.Instance.PlayHit();
-                }
-                StartCoroutine(InvincibilityRoutine(isGround));
-            } else {
-                // No lives left - die for real
-                if (GameManager.Instance != null) {
-                    GameManager.Instance.BirdDied();
-                    if (isGround) {
-                        GameManager.Instance.EndGame();
-                    }
-                }
-                HandleDeath();
+            if (AudioManager.Instance != null) {
+                AudioManager.Instance.PlayHit();
             }
+            StartCoroutine(InvincibilityRoutine(isGround));
+        } else {
+            currentLives = 0;
+            OnLivesChanged?.Invoke(currentLives);
+
+            // Sync subtraction if we had 1 life remaining
+            if (TelegramManager.Instance != null && TelegramManager.Instance.syncedLives > 0) {
+                TelegramManager.Instance.SubtractLifeInBackend(1);
+            }
+
+            // No lives left - die for real
+            if (GameManager.Instance != null) {
+                GameManager.Instance.BirdDied();
+                if (isGround) {
+                    GameManager.Instance.EndGame();
+                }
+            }
+            HandleDeath();
         }
     }
 

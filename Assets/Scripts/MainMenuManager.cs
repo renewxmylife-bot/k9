@@ -71,6 +71,11 @@ public class MainMenuManager : MonoBehaviour {
     }
 
     public void OnPlayPressed() {
+        if (TelegramManager.Instance != null && TelegramManager.Instance.syncedLives <= 0) {
+            UnityEngine.Debug.Log("[MAIN_MENU] Player has 0 lives! Opening Lives shop...");
+            TelegramManager.Instance.OpenTelegramShop("lives");
+            return;
+        }
         Time.timeScale = 1f;
         UnityEngine.Debug.Log("[MAIN_MENU] Play button pressed. Loading FlappyBirdScene...");
         SceneManager.LoadScene("FlappyBirdScene");

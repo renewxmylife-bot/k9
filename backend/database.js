@@ -14,8 +14,12 @@ const db = new sqlite3.Database(dbPath, (err) => {
                 lives INTEGER DEFAULT 5,
                 skins TEXT DEFAULT '["default"]',
                 active_skin TEXT DEFAULT 'default',
-                is_premium INTEGER DEFAULT 0
+                is_premium INTEGER DEFAULT 0,
+                last_refill TEXT
             )`);
+            db.run("ALTER TABLE users ADD COLUMN last_refill TEXT", (err) => {
+                // Ignore "duplicate column" errors
+            });
         });
     }
 });
@@ -51,12 +55,27 @@ const database = {
 
     async ensureUser(telegramId, username) {
         let user = await this.getUser(telegramId);
+        const todayStr = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+
         if (!user) {
             await dbRun(
-                'INSERT INTO users (telegram_id, username, lives, skins, active_skin, is_premium) VALUES (?, ?, 5, ?, "default", 0)',
-                [telegramId, username || '', JSON.stringify(['default'])]
+                'INSERT INTO users (telegram_id, username, lives, skins, active_skin, is_premium, last_refill) VALUES (?, ?, 5, ?, "default", 0, ?)',
+                [telegramId, username || '', JSON.stringify(['default']), todayStr]
             );
             user = await this.getUser(telegramId);
+        } else {
+            // Daily Refill Check
+            if (user.last_refill !== todayStr) {
+                if (user.lives < 5) {
+                    await dbRun('UPDATE users SET lives = 5, last_refill = ? WHERE telegram_id = ?', [todayStr, telegramId]);
+                    console.log(`[DAILY_REFILL] Gifting 5 lives to user ${telegramId} (${username || 'unknown'})`);
+                    user = await this.getUser(telegramId);
+                } else {
+                    // Already has 5 or more lives (e.g. purchased). Just update the date.
+                    await dbRun('UPDATE users SET last_refill = ? WHERE telegram_id = ?', [todayStr, telegramId]);
+                    user = await this.getUser(telegramId);
+                }
+            }
         }
         return user;
     },
